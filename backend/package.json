@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "serverless offline --port 800sd0 start"
+  },
   "devDependencies": {
     "serverless-offline": "^3.15.1"
   },

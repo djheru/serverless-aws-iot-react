@@ -64,46 +64,57 @@ const ChatHeader = ({isConnected}) => (
 	</Navbar>
 );
 
-const ChatInput = ({onSend}) => {
-	const onSubmit = (event) => {
-		onSend(this.input.value);
-		this.input.value = ''
+class ChatInput extends Component {
+  constructor(props) {
+    super(props);
+    this.onSubmit = this.onSubmit.bind(this);
+  }
+
+	onSubmit(event) {
+		this.props.onSend(this.input.value);
+		this.input.value = '';
 		event.preventDefault();
 	}
-	return (
-		<Navbar fixedBottom fluid>
-			<Col xs={9} xsOffset={3}>
-				<Form inline onSubmit={onSubmit}>
-					<InputGroup>
-						<FormControl
-							type="text"
-							placeholder="type a message..."
-							inputRef={ref => {this.input = ref; }}/>
-						<InputGroup.Button>
-							<Button type="submit">Send</Button>
-						</InputGroup.Button>
-					</InputGroup>
-				</Form>
-			</Col>
-		</Navbar>
-	);
+
+	render() {
+    return (
+      <Navbar fixedBottom fluid>
+        <Col xs={9} xsOffset={3}>
+          <Form inline onSubmit={this.onSubmit}>
+            <InputGroup>
+              <FormControl
+                type="text"
+                placeholder="type a message..."
+                inputRef={ref => {this.input = ref; }}/>
+              <InputGroup.Button>
+                <Button type="submit">Send</Button>
+              </InputGroup.Button>
+            </InputGroup>
+          </Form>
+        </Col>
+      </Navbar>
+    );
+  }
 };
 
-const ChatWindow = ({users, messages, onSend}) => (
-	<div>
-		<Grid fluid>
-			<Row>
-				<Col xs={3}>
-					<Users users={users}/>
-				</Col>
-				<Col xs={9}>
-					<ChatMessages messages={messages}/>
-				</Col>
-			</Row>
-		</Grid>
-		<ChatInput onSend={onSend}/>
-	</div>
-);
+const ChatWindow = ({users, messages, onSend}) => {
+  console.log(users, messages, onSend);
+  return (
+    <div>
+      <Grid fluid>
+        <Row>
+          <Col xs={3}>
+            <Users users={users}/>
+          </Col>
+          <Col xs={9}>
+            <ChatMessages messages={messages}/>
+          </Col>
+        </Row>
+      </Grid>
+      <ChatInput onSend={onSend}/>
+    </div>
+  );
+};
 
 class UserNamePrompt extends Component {
 	constructor(props) {
@@ -157,13 +168,17 @@ class App extends Component {
 	connect(username) {
 		this.setState({username});
 		this.client = new RealtimeClient(this.state.clientId, username);
+		console.log('ohai', this.state);
 		this.client.connect()
 			.then(() => {
+		  console.log('connection complete');
 				this.setState({isConnected: true});
 				this.client.onMessageReceived((topic, message) => {
+				  console.log('topic', topic);
 					switch (topic) {
 						case 'client-connected':
-							this.setState({ user: [...this.state.users, message] });
+						  console.log('ohai');
+							this.setState({ users: [...this.state.users, message] });
 							break;
 						case 'client-disconnected':
 							this.setState({users: this.state.users.filter(user => user.clientId !== message.clientId)});
